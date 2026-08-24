@@ -1,0 +1,48 @@
+name: afterpay
+description: "AfterPay — know exactly how much of your salary is left."
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.2
+
+dependencies:
+  dio: ^5.10.0
+  flutter:
+    sdk: flutter
+  flutter_launcher_icons: ^0.14.4
+  flutter_riverpod: ^3.3.2
+  flutter_secure_storage: ^10.3.1
+  go_router: ^17.3.0
+  intl: 0.20.2
+  logger: ^2.7.0
+  uuid: ^4.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.4.6
+  mocktail: ^1.0.5
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path: "assets/icons/app_icon.png"
+
+flutter_native_splash:
+  # No image here on purpose: the OS-level native splash (unavoidable on
+  # Android/iOS — something renders before Flutter/Dart even starts) is left
+  # as a plain color matching SplashPage's background, so the logo only ever
+  # appears once, drawn by Flutter itself, instead of flashing twice.
+  color: "#F5F7FB"
+  android_12:
+    color: "#F5F7FB"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - assets/images/
+    - assets/icons/
