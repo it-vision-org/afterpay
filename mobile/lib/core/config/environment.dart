@@ -1,11 +1,11 @@
 abstract final class Environment {
-  /// Defaults to a locally-running backend. Override with e.g.
-  /// `--dart-define=API_BASE_URL=http://10.0.2.2:8080/api` (Android emulator),
-  /// `http://localhost:8080/api` (iOS simulator), or the deployed AfterPay
-  /// API's URL once one exists — a plain `flutter build` without a
-  /// dart-define is only meant for local development against this default.
+  /// Defaults to the hosted Render backend, so a plain `flutter build`
+  /// (no dart-defines) talks to the real API. For local development against
+  /// a backend running on your machine, override with e.g.
+  /// `--dart-define=API_BASE_URL=http://10.0.2.2:8080/api` (Android emulator)
+  /// or `http://localhost:8080/api` (iOS simulator).
   static const apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://localhost:8080/api',
+    defaultValue: 'https://afterpay-e4rb.onrender.com/api',
   );
 }
