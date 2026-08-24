@@ -52,18 +52,13 @@ class AuthRepository {
   }
 
   Future<UserSummary> updateFinancialProfile({
-    required num monthlySalary,
     required String currency,
     required int salaryDay,
   }) async {
     try {
       final response = await _dio.patch<Map<String, dynamic>>(
         '/auth/me/financial-profile',
-        data: {
-          'monthlySalary': monthlySalary,
-          'currency': currency,
-          'salaryDay': salaryDay,
-        },
+        data: {'currency': currency, 'salaryDay': salaryDay},
       );
       return UserSummary.fromJson(response.data!);
     } on DioException catch (e) {

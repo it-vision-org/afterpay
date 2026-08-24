@@ -3,6 +3,8 @@ package com.afterpay.expense.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 
@@ -45,6 +47,22 @@ public class SalaryPeriodService {
 
     public SalaryPeriod previousPeriod(SalaryPeriod current, int salaryDay) {
         return periodForDate(current.start().minusDays(1), salaryDay);
+    }
+
+    /**
+     * The current period followed by the {@code count - 1} periods before it,
+     * newest first — used to offer a user a list of specific past periods to
+     * pick from.
+     */
+    public List<SalaryPeriod> recentPeriods(int salaryDay, int count) {
+        List<SalaryPeriod> periods = new ArrayList<>(count);
+        SalaryPeriod period = currentPeriod(salaryDay);
+        periods.add(period);
+        for (int i = 1; i < count; i++) {
+            period = previousPeriod(period, salaryDay);
+            periods.add(period);
+        }
+        return periods;
     }
 
     private LocalDate clampedStart(YearMonth month, int salaryDay) {

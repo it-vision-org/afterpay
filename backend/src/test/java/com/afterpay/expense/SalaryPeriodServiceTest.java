@@ -93,4 +93,20 @@ class SalaryPeriodServiceTest {
         assertEquals(LocalDate.of(2026, 7, 25), previous.start());
         assertEquals(LocalDate.of(2026, 8, 24), previous.end());
     }
+
+    @Test
+    void recentPeriodsReturnsNewestFirstAndChainsContiguously() {
+        SalaryPeriodService service = serviceAt(LocalDate.of(2026, 8, 25));
+        var periods = service.recentPeriods(25, 4);
+
+        assertEquals(4, periods.size());
+        assertEquals(LocalDate.of(2026, 8, 25), periods.get(0).start());
+        assertEquals(LocalDate.of(2026, 7, 25), periods.get(1).start());
+        assertEquals(LocalDate.of(2026, 6, 25), periods.get(2).start());
+        assertEquals(LocalDate.of(2026, 5, 25), periods.get(3).start());
+
+        for (int i = 1; i < periods.size(); i++) {
+            assertEquals(periods.get(i - 1).start(), periods.get(i).end().plusDays(1));
+        }
+    }
 }

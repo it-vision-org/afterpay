@@ -13,6 +13,7 @@ import com.afterpay.expense.repository.RecurringExpenseRepository;
 import com.afterpay.expense.service.SalaryPeriodService;
 import com.afterpay.expense.service.SalaryPeriodService.SalaryPeriod;
 import com.afterpay.identity.domain.User;
+import com.afterpay.salary.repository.SalarySourceRepository;
 
 @Service
 public class DashboardService {
@@ -22,17 +23,20 @@ public class DashboardService {
 
     private final ExpenseRepository expenseRepository;
     private final RecurringExpenseRepository recurringExpenseRepository;
+    private final SalarySourceRepository salarySourceRepository;
     private final SalaryPeriodService salaryPeriodService;
     private final ExpenseMapper expenseMapper;
 
     public DashboardService(
         ExpenseRepository expenseRepository,
         RecurringExpenseRepository recurringExpenseRepository,
+        SalarySourceRepository salarySourceRepository,
         SalaryPeriodService salaryPeriodService,
         ExpenseMapper expenseMapper
     ) {
         this.expenseRepository = expenseRepository;
         this.recurringExpenseRepository = recurringExpenseRepository;
+        this.salarySourceRepository = salarySourceRepository;
         this.salaryPeriodService = salaryPeriodService;
         this.expenseMapper = expenseMapper;
     }
@@ -41,7 +45,7 @@ public class DashboardService {
     public DashboardResponse get(User user) {
         SalaryPeriod period = salaryPeriodService.currentPeriod(user.getSalaryDay());
 
-        BigDecimal salary = user.getMonthlySalary();
+        BigDecimal salary = salarySourceRepository.sumAmountByUserId(user.getId());
         BigDecimal recurringTotal = recurringExpenseRepository.sumAmountByUserIdAndActiveTrue(user.getId());
         BigDecimal oneTimeTotal = expenseRepository.sumAmountByUserIdAndExpenseDateBetween(user.getId(), period.start(), period.end());
         BigDecimal totalSpent = recurringTotal.add(oneTimeTotal);

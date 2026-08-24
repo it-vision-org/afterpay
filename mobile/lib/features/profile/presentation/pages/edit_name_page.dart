@@ -5,10 +5,12 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/network/error_messages.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
+/// Reads the current user from [authControllerProvider] rather than a route
+/// `extra` — saving triggers an auth-state change while this page is still
+/// mounted, and go_router's `redirect` re-evaluation can drop `extra` on
+/// that refresh, which previously crashed this page with a null cast.
 class EditNamePage extends ConsumerStatefulWidget {
-  const EditNamePage({required this.currentName, super.key});
-
-  final String currentName;
+  const EditNamePage({super.key});
 
   @override
   ConsumerState<EditNamePage> createState() => _EditNamePageState();
@@ -16,7 +18,9 @@ class EditNamePage extends ConsumerStatefulWidget {
 
 class _EditNamePageState extends ConsumerState<EditNamePage> {
   final _formKey = GlobalKey<FormState>();
-  late final _nameController = TextEditingController(text: widget.currentName);
+  late final _nameController = TextEditingController(
+    text: ref.read(authControllerProvider).value?.fullName ?? '',
+  );
 
   bool _isSaving = false;
   String? _error;

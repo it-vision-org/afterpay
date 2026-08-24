@@ -1,6 +1,5 @@
 package com.afterpay.identity.domain;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -39,9 +38,6 @@ public class User {
 
     @Column(name = "email_verified_at")
     private Instant emailVerifiedAt;
-
-    @Column(name = "monthly_salary", nullable = false, precision = 14, scale = 2)
-    private BigDecimal monthlySalary = BigDecimal.ZERO;
 
     @Column(name = "currency", nullable = false, length = 3)
     private String currency = "TND";

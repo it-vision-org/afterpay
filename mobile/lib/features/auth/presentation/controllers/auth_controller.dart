@@ -39,17 +39,12 @@ class AuthController extends AsyncNotifier<UserSummary?> {
   }
 
   Future<void> updateFinancialProfile({
-    required num monthlySalary,
     required String currency,
     required int salaryDay,
   }) async {
     final user = await ref
         .read(authRepositoryProvider)
-        .updateFinancialProfile(
-          monthlySalary: monthlySalary,
-          currency: currency,
-          salaryDay: salaryDay,
-        );
+        .updateFinancialProfile(currency: currency, salaryDay: salaryDay);
     state = AsyncData(user);
   }
 

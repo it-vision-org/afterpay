@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../core/utils/ordinal.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
+import '../../../dashboard/presentation/controllers/dashboard_controller.dart';
 
 class ProfilePage extends ConsumerWidget {
   const ProfilePage({super.key});
@@ -12,6 +13,7 @@ class ProfilePage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(authControllerProvider).value;
+    final totalSalary = ref.watch(dashboardControllerProvider).value?.salary;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -109,16 +111,14 @@ class ProfilePage extends ConsumerWidget {
               children: [
                 ListTile(
                   leading: const Icon(Icons.payments_outlined),
-                  title: const Text('Salary'),
+                  title: const Text('Salaries'),
                   subtitle: Text(
-                    user == null
+                    totalSalary == null || user == null
                         ? ''
-                        : formatMoney(user.monthlySalary, user.currency),
+                        : formatMoney(totalSalary, user.currency),
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: user == null
-                      ? null
-                      : () => context.push('/profile/edit-salary', extra: user),
+                  onTap: () => context.push('/profile/salaries'),
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
                 ListTile(
@@ -130,9 +130,7 @@ class ProfilePage extends ConsumerWidget {
                         : '${ordinal(user.salaryDay)} of every month',
                   ),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: user == null
-                      ? null
-                      : () => context.push('/profile/edit-salary', extra: user),
+                  onTap: () => context.push('/profile/edit-salary'),
                 ),
                 const Divider(height: 1, indent: 16, endIndent: 16),
                 ListTile(
@@ -140,9 +138,7 @@ class ProfilePage extends ConsumerWidget {
                   title: const Text('Currency'),
                   subtitle: Text(user?.currency ?? ''),
                   trailing: const Icon(Icons.chevron_right),
-                  onTap: user == null
-                      ? null
-                      : () => context.push('/profile/edit-salary', extra: user),
+                  onTap: () => context.push('/profile/edit-salary'),
                 ),
               ],
             ),

@@ -3,13 +3,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/network/error_messages.dart';
-import '../../../auth/data/models/user_summary.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 
+/// Reads the current user from [authControllerProvider] rather than a route
+/// `extra` — saving triggers an auth-state change while this page is still
+/// mounted, and go_router's `redirect` re-evaluation can drop `extra` on
+/// that refresh, which previously crashed this page with a null cast.
 class EditSalaryPage extends ConsumerStatefulWidget {
-  const EditSalaryPage({required this.user, super.key});
-
-  final UserSummary user;
+  const EditSalaryPage({super.key});
 
   @override
   ConsumerState<EditSalaryPage> createState() => _EditSalaryPageState();
@@ -17,20 +18,16 @@ class EditSalaryPage extends ConsumerStatefulWidget {
 
 class _EditSalaryPageState extends ConsumerState<EditSalaryPage> {
   final _formKey = GlobalKey<FormState>();
-  late final _salaryController = TextEditingController(
-    text: widget.user.monthlySalary.toString(),
-  );
   late final _currencyController = TextEditingController(
-    text: widget.user.currency,
+    text: ref.read(authControllerProvider).value?.currency ?? 'TND',
   );
-  late int _salaryDay = widget.user.salaryDay;
+  late int _salaryDay = ref.read(authControllerProvider).value?.salaryDay ?? 1;
 
   bool _isSaving = false;
   String? _error;
 
   @override
   void dispose() {
-    _salaryController.dispose();
     _currencyController.dispose();
     super.dispose();
   }
@@ -39,7 +36,7 @@ class _EditSalaryPageState extends ConsumerState<EditSalaryPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Salary settings'),
+        title: const Text('Period settings'),
         actions: [
           TextButton(
             onPressed: _isSaving ? null : _submit,
@@ -62,27 +59,9 @@ class _EditSalaryPageState extends ConsumerState<EditSalaryPage> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 TextFormField(
-                  controller: _salaryController,
-                  enabled: !_isSaving,
-                  autofocus: true,
-                  keyboardType: const TextInputType.numberWithOptions(
-                    decimal: true,
-                  ),
-                  decoration: const InputDecoration(
-                    labelText: 'Monthly salary',
-                  ),
-                  validator: (value) {
-                    final amount = num.tryParse(value ?? '');
-                    if (amount == null || amount <= 0) {
-                      return 'Enter a valid amount';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
                   controller: _currencyController,
                   enabled: !_isSaving,
+                  autofocus: true,
                   textCapitalization: TextCapitalization.characters,
                   maxLength: 3,
                   decoration: const InputDecoration(
@@ -96,7 +75,11 @@ class _EditSalaryPageState extends ConsumerState<EditSalaryPage> {
                 const SizedBox(height: 8),
                 DropdownButtonFormField<int>(
                   initialValue: _salaryDay,
-                  decoration: const InputDecoration(labelText: 'Salary day'),
+                  decoration: const InputDecoration(
+                    labelText: 'Salary day',
+                    helperText:
+                        'The day your salary period resets each month',
+                  ),
                   onChanged: _isSaving
                       ? null
                       : (value) {
@@ -139,7 +122,6 @@ class _EditSalaryPageState extends ConsumerState<EditSalaryPage> {
       await ref
           .read(authControllerProvider.notifier)
           .updateFinancialProfile(
-            monthlySalary: num.parse(_salaryController.text),
             currency: _currencyController.text.trim().toUpperCase(),
             salaryDay: _salaryDay,
           );

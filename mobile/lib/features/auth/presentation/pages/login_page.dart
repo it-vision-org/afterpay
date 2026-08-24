@@ -45,7 +45,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                   Image.asset('assets/images/home-screen.png', height: 60),
                   const SizedBox(height: 12),
                   Text(
-                    'Log in to keep track of who owes who',
+                    'KNOW WHAT\'S LEFT',
                     style: Theme.of(context).textTheme.bodyLarge,
                     textAlign: TextAlign.center,
                   ),

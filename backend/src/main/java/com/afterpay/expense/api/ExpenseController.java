@@ -1,5 +1,6 @@
 package com.afterpay.expense.api;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,9 +40,10 @@ public class ExpenseController {
     @GetMapping
     public List<ExpenseResponse> list(
         @AuthenticationPrincipal Jwt jwt,
-        @RequestParam(required = false) ExpensePeriodFilter period
+        @RequestParam(required = false) ExpensePeriodFilter period,
+        @RequestParam(required = false) List<LocalDate> periodStart
     ) {
-        return expenseService.list(currentUserProvider.require(jwt), period);
+        return expenseService.list(currentUserProvider.require(jwt), period, periodStart);
     }
 
     @GetMapping("/{id}")

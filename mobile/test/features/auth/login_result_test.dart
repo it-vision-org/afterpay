@@ -12,7 +12,6 @@ void main() {
           id: 'u-1',
           fullName: 'Ahmed Zouaghi',
           email: 'ahmed@example.com',
-          monthlySalary: 2500,
           currency: 'EUR',
           salaryDay: 25,
         );

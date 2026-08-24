@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../features/auth/data/models/user_summary.dart';
 import '../../features/auth/presentation/controllers/auth_controller.dart';
 import '../../features/auth/presentation/pages/forgot_password_page.dart';
 import '../../features/auth/presentation/pages/login_page.dart';
@@ -23,6 +22,9 @@ import '../../features/profile/presentation/pages/profile_page.dart';
 import '../../features/recurring/data/models/recurring_expense.dart';
 import '../../features/recurring/presentation/pages/recurring_expense_form_page.dart';
 import '../../features/recurring/presentation/pages/recurring_expenses_page.dart';
+import '../../features/salaries/data/models/salary_source.dart';
+import '../../features/salaries/presentation/pages/salaries_page.dart';
+import '../../features/salaries/presentation/pages/salary_source_form_page.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import '../widgets/main_shell.dart';
 
@@ -180,19 +182,34 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profile/edit-name',
         name: 'profile-edit-name',
-        builder: (context, state) =>
-            EditNamePage(currentName: state.extra as String),
+        builder: (context, state) => const EditNamePage(),
       ),
       GoRoute(
         path: '/profile/edit-salary',
         name: 'profile-edit-salary',
-        builder: (context, state) =>
-            EditSalaryPage(user: state.extra as UserSummary),
+        builder: (context, state) => const EditSalaryPage(),
       ),
       GoRoute(
         path: '/profile/change-password',
         name: 'profile-change-password',
         builder: (context, state) => const ChangePasswordPage(),
+      ),
+      GoRoute(
+        path: '/profile/salaries',
+        name: 'salaries',
+        builder: (context, state) => const SalariesPage(),
+      ),
+      GoRoute(
+        path: '/profile/salaries/new',
+        name: 'salary-new',
+        builder: (context, state) => const SalarySourceFormPage(),
+      ),
+      GoRoute(
+        path: '/profile/salaries/:id/edit',
+        name: 'salary-edit',
+        builder: (context, state) => SalarySourceFormPage(
+          salarySource: state.extra as SalarySource?,
+        ),
       ),
     ],
   );

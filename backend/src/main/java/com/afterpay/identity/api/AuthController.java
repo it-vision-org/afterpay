@@ -81,7 +81,7 @@ public class AuthController {
     @PatchMapping("/me/financial-profile")
     public UserSummary updateFinancialProfile(@Valid @RequestBody UpdateFinancialProfileRequest request, @AuthenticationPrincipal Jwt jwt) {
         User user = currentUserProvider.require(jwt);
-        return authService.updateFinancialProfile(user, request.monthlySalary(), request.currency(), request.salaryDay());
+        return authService.updateFinancialProfile(user, request.currency(), request.salaryDay());
     }
 
     @PatchMapping("/me/password")

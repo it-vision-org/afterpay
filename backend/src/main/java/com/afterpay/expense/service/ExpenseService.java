@@ -1,5 +1,7 @@
 package com.afterpay.expense.service;
 
+import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,7 +32,19 @@ public class ExpenseService {
     }
 
     @Transactional(readOnly = true)
-    public List<ExpenseResponse> list(User user, ExpensePeriodFilter filter) {
+    public List<ExpenseResponse> list(User user, ExpensePeriodFilter filter, List<LocalDate> periodStarts) {
+        if (periodStarts != null && !periodStarts.isEmpty()) {
+            return periodStarts.stream()
+                .map(start -> salaryPeriodService.periodForDate(start, user.getSalaryDay()))
+                .distinct()
+                .flatMap(period -> expenseRepository
+                    .findAllByUserIdAndExpenseDateBetweenOrderByExpenseDateDescCreatedAtDesc(user.getId(), period.start(), period.end())
+                    .stream())
+                .sorted(Comparator.comparing(Expense::getExpenseDate).thenComparing(Expense::getCreatedAt).reversed())
+                .map(mapper::toResponse)
+                .toList();
+        }
+
         ExpensePeriodFilter effectiveFilter = filter == null ? ExpensePeriodFilter.CURRENT : filter;
 
         if (effectiveFilter == ExpensePeriodFilter.ALL) {
@@ -39,11 +53,7 @@ public class ExpenseService {
                 .toList();
         }
 
-        SalaryPeriod current = salaryPeriodService.currentPeriod(user.getSalaryDay());
-        SalaryPeriod period = effectiveFilter == ExpensePeriodFilter.PREVIOUS
-            ? salaryPeriodService.previousPeriod(current, user.getSalaryDay())
-            : current;
-
+        SalaryPeriod period = salaryPeriodService.currentPeriod(user.getSalaryDay());
         return expenseRepository
             .findAllByUserIdAndExpenseDateBetweenOrderByExpenseDateDescCreatedAtDesc(user.getId(), period.start(), period.end())
             .stream()

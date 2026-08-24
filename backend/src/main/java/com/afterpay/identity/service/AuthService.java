@@ -1,6 +1,5 @@
 package com.afterpay.identity.service;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -77,8 +76,7 @@ public class AuthService {
     }
 
     @Transactional
-    public UserSummary updateFinancialProfile(User user, BigDecimal monthlySalary, String currency, int salaryDay) {
-        user.setMonthlySalary(monthlySalary);
+    public UserSummary updateFinancialProfile(User user, String currency, int salaryDay) {
         user.setCurrency(currency.trim().toUpperCase());
         user.setSalaryDay(salaryDay);
         userRepository.save(user);

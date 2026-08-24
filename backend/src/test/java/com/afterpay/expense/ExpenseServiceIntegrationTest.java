@@ -2,6 +2,7 @@ package com.afterpay.expense;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ class ExpenseServiceIntegrationTest extends IntegrationTestSupport {
     }
 
     @Test
-    void listFiltersByCurrentAndPreviousSalaryPeriod() {
+    void listFiltersByCurrentSpecificAndAllSalaryPeriods() {
         User user = createUser("periods-" + System.nanoTime() + "@afterpay.test");
 
         LocalDate today = LocalDate.now();
@@ -76,19 +77,26 @@ class ExpenseServiceIntegrationTest extends IntegrationTestSupport {
         ExpenseResponse previousExpense = expenseService.create(user, new ExpenseRequest(
             "Previous", new BigDecimal("20.00"), Category.OTHER, lastMonth, null, null, null
         ));
-        expenseService.create(user, new ExpenseRequest(
+        ExpenseResponse olderExpense = expenseService.create(user, new ExpenseRequest(
             "Older", new BigDecimal("30.00"), Category.OTHER, twoMonthsAgo, null, null, null
         ));
 
-        var currentPeriodList = expenseService.list(user, ExpensePeriodFilter.CURRENT);
+        var currentPeriodList = expenseService.list(user, ExpensePeriodFilter.CURRENT, null);
         assertEquals(1, currentPeriodList.size());
         assertEquals(currentExpense.id(), currentPeriodList.get(0).id());
 
-        var previousPeriodList = expenseService.list(user, ExpensePeriodFilter.PREVIOUS);
-        assertEquals(1, previousPeriodList.size());
-        assertEquals(previousExpense.id(), previousPeriodList.get(0).id());
+        var specificPeriodList = expenseService.list(user, null, List.of(lastMonth));
+        assertEquals(1, specificPeriodList.size());
+        assertEquals(previousExpense.id(), specificPeriodList.get(0).id());
 
-        var allList = expenseService.list(user, ExpensePeriodFilter.ALL);
+        var unionOfTwoPeriods = expenseService.list(user, null, List.of(lastMonth, twoMonthsAgo));
+        assertEquals(2, unionOfTwoPeriods.size());
+        assertEquals(
+            List.of(previousExpense.id(), olderExpense.id()),
+            unionOfTwoPeriods.stream().map(ExpenseResponse::id).toList()
+        );
+
+        var allList = expenseService.list(user, ExpensePeriodFilter.ALL, null);
         assertEquals(3, allList.size());
     }
 
@@ -102,6 +110,6 @@ class ExpenseServiceIntegrationTest extends IntegrationTestSupport {
         ));
 
         assertThrows(ApiException.class, () -> expenseService.get(intruder, created.id()));
-        assertTrue(expenseService.list(intruder, ExpensePeriodFilter.ALL).isEmpty());
+        assertTrue(expenseService.list(intruder, ExpensePeriodFilter.ALL, null).isEmpty());
     }
 }

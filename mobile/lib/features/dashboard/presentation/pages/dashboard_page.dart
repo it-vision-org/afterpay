@@ -50,8 +50,6 @@ class DashboardPage extends ConsumerWidget {
                 const SizedBox(height: 16),
                 _StatRow(summary: summary, currency: currency),
                 const SizedBox(height: 24),
-                _QuickActions(),
-                const SizedBox(height: 24),
                 Text(
                   'Recent expenses',
                   style: Theme.of(context).textTheme.titleMedium,
@@ -244,68 +242,6 @@ class _StatTile extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _QuickActions extends StatelessWidget {
-  const _QuickActions();
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          _QuickActionChip(
-            icon: Icons.add_circle_outline,
-            label: 'Add expense',
-            onTap: () => context.push('/expenses/new'),
-          ),
-          const SizedBox(width: 8),
-          _QuickActionChip(
-            icon: Icons.autorenew,
-            label: 'Recurring',
-            onTap: () => context.push('/recurring'),
-          ),
-          const SizedBox(width: 8),
-          _QuickActionChip(
-            icon: Icons.receipt_long_outlined,
-            label: 'All expenses',
-            onTap: () => context.push('/expenses'),
-          ),
-          const SizedBox(width: 8),
-          _QuickActionChip(
-            icon: Icons.person_outline,
-            label: 'Profile',
-            onTap: () => context.push('/profile'),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _QuickActionChip extends StatelessWidget {
-  const _QuickActionChip({
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return ActionChip(
-      avatar: Icon(icon, size: 18, color: colorScheme.primary),
-      label: Text(label),
-      onPressed: onTap,
-      backgroundColor: colorScheme.primary.withValues(alpha: 0.08),
-      side: BorderSide.none,
     );
   }
 }

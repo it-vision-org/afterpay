@@ -5,22 +5,18 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
-import '../../data/models/expense_period.dart';
+import '../../data/models/expenses_filter.dart';
+import '../../data/models/period_option.dart';
 import '../controllers/expenses_controller.dart';
 import '../widgets/expense_tile.dart';
+import '../widgets/specific_period_picker_sheet.dart';
 
 class ExpensesPage extends ConsumerWidget {
   const ExpensesPage({super.key});
 
-  static const _tabs = [
-    (ExpensePeriod.current, 'Current period'),
-    (ExpensePeriod.previous, 'Previous period'),
-    (ExpensePeriod.all, 'All'),
-  ];
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final selectedFilter = ref.watch(expensesPeriodFilterProvider);
+    final selectedFilter = ref.watch(expensesFilterProvider);
     final expensesAsync = ref.watch(expensesControllerProvider);
     final currency = ref.watch(authControllerProvider).value?.currency ?? 'TND';
 
@@ -37,22 +33,29 @@ class ExpensesPage extends ConsumerWidget {
             child: SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
-                children: _tabs
-                    .map(
-                      (tab) => Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: ChoiceChip(
-                          label: Text(tab.$2),
-                          selected: selectedFilter == tab.$1,
-                          onSelected: (_) =>
-                              ref
-                                      .read(expensesPeriodFilterProvider.notifier)
-                                      .state =
-                                  tab.$1,
-                        ),
-                      ),
-                    )
-                    .toList(),
+                children: [
+                  ChoiceChip(
+                    label: const Text('Current period'),
+                    selected: selectedFilter is CurrentPeriodFilter,
+                    onSelected: (_) =>
+                        ref.read(expensesFilterProvider.notifier).state =
+                            const CurrentPeriodFilter(),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: const Text('All'),
+                    selected: selectedFilter is AllExpensesFilter,
+                    onSelected: (_) =>
+                        ref.read(expensesFilterProvider.notifier).state =
+                            const AllExpensesFilter(),
+                  ),
+                  const SizedBox(width: 8),
+                  ChoiceChip(
+                    label: Text(_specificChipLabel(selectedFilter)),
+                    selected: selectedFilter is SpecificPeriodsFilter,
+                    onSelected: (_) => _openPeriodPicker(context, ref),
+                  ),
+                ],
               ),
             ),
           ),
@@ -104,5 +107,33 @@ class ExpensesPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _specificChipLabel(ExpensesFilter filter) {
+    if (filter is! SpecificPeriodsFilter) {
+      return 'Specific period';
+    }
+    if (filter.periods.length == 1) {
+      return filter.periods.first.label;
+    }
+    return '${filter.periods.length} periods';
+  }
+
+  Future<void> _openPeriodPicker(BuildContext context, WidgetRef ref) async {
+    final currentFilter = ref.read(expensesFilterProvider);
+    final preselected = currentFilter is SpecificPeriodsFilter
+        ? currentFilter.periods
+        : const <PeriodOption>[];
+
+    final selected = await showModalBottomSheet<List<PeriodOption>>(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) => SpecificPeriodPickerSheet(preselected: preselected),
+    );
+
+    if (selected != null && selected.isNotEmpty) {
+      ref.read(expensesFilterProvider.notifier).state =
+          SpecificPeriodsFilter(selected);
+    }
   }
 }

@@ -6,7 +6,7 @@ import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_exception.dart';
 import '../models/category.dart';
 import '../models/expense.dart';
-import '../models/expense_period.dart';
+import '../models/expenses_filter.dart';
 
 final expenseRepositoryProvider = Provider<ExpenseRepository>((ref) {
   return ExpenseRepository(ref.watch(dioProvider));
@@ -19,11 +19,25 @@ class ExpenseRepository {
 
   final Dio _dio;
 
-  Future<List<Expense>> list({ExpensePeriod? period}) async {
+  Future<List<Expense>> list({
+    ExpensesFilter filter = const CurrentPeriodFilter(),
+  }) async {
     try {
+      final queryParameters = <String, dynamic>{};
+      switch (filter) {
+        case CurrentPeriodFilter():
+          queryParameters['period'] = 'CURRENT';
+        case AllExpensesFilter():
+          queryParameters['period'] = 'ALL';
+        case SpecificPeriodsFilter(:final periods):
+          queryParameters['periodStart'] = periods
+              .map((p) => _dateFormat.format(p.start))
+              .toList();
+      }
+
       final response = await _dio.get<List<dynamic>>(
         '/expenses',
-        queryParameters: {if (period != null) 'period': period.apiValue},
+        queryParameters: queryParameters,
       );
       return response.data!
           .map((e) => Expense.fromJson(e as Map<String, dynamic>))

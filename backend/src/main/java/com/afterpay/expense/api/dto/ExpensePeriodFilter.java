@@ -6,6 +6,5 @@ package com.afterpay.expense.api.dto;
  */
 public enum ExpensePeriodFilter {
     CURRENT,
-    PREVIOUS,
     ALL
 }
