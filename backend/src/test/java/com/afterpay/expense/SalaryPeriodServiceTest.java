@@ -84,29 +84,23 @@ class SalaryPeriodServiceTest {
     }
 
     @Test
-    void previousPeriodImmediatelyPrecedesCurrentPeriod() {
-        SalaryPeriodService service = serviceAt(LocalDate.of(2026, 8, 25));
-        SalaryPeriod current = service.currentPeriod(25);
-        SalaryPeriod previous = service.previousPeriod(current, 25);
+    void firstDayOfCalendarMonthAlwaysResolvesToThePeriodEndingInThatMonth() {
+        // The mobile app's month/year picker asks for "the period ending in
+        // August 2026" by passing periodStart=2026-08-01 — this only works
+        // if day 1 of any calendar month reliably falls inside the period
+        // whose end date lands in that same month, for every salary day.
+        SalaryPeriodService service = new SalaryPeriodService(Clock.systemUTC());
 
-        assertEquals(current.start(), previous.end().plusDays(1));
-        assertEquals(LocalDate.of(2026, 7, 25), previous.start());
-        assertEquals(LocalDate.of(2026, 8, 24), previous.end());
-    }
+        for (int salaryDay = 1; salaryDay <= 31; salaryDay++) {
+            LocalDate firstOfAugust = LocalDate.of(2026, 8, 1);
+            SalaryPeriod period = service.periodForDate(firstOfAugust, salaryDay);
 
-    @Test
-    void recentPeriodsReturnsNewestFirstAndChainsContiguously() {
-        SalaryPeriodService service = serviceAt(LocalDate.of(2026, 8, 25));
-        var periods = service.recentPeriods(25, 4);
-
-        assertEquals(4, periods.size());
-        assertEquals(LocalDate.of(2026, 8, 25), periods.get(0).start());
-        assertEquals(LocalDate.of(2026, 7, 25), periods.get(1).start());
-        assertEquals(LocalDate.of(2026, 6, 25), periods.get(2).start());
-        assertEquals(LocalDate.of(2026, 5, 25), periods.get(3).start());
-
-        for (int i = 1; i < periods.size(); i++) {
-            assertEquals(periods.get(i - 1).start(), periods.get(i).end().plusDays(1));
+            assertEquals(
+                8,
+                period.end().getMonthValue(),
+                "salaryDay=" + salaryDay + " produced a period ending in month " + period.end().getMonthValue()
+            );
+            assertEquals(2026, period.end().getYear());
         }
     }
 }

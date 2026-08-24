@@ -6,10 +6,10 @@ import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../auth/presentation/controllers/auth_controller.dart';
 import '../../data/models/expenses_filter.dart';
-import '../../data/models/period_option.dart';
+import '../../data/models/month_selection.dart';
 import '../controllers/expenses_controller.dart';
 import '../widgets/expense_tile.dart';
-import '../widgets/specific_period_picker_sheet.dart';
+import '../widgets/month_year_picker_sheet.dart';
 
 class ExpensesPage extends ConsumerWidget {
   const ExpensesPage({super.key});
@@ -113,22 +113,27 @@ class ExpensesPage extends ConsumerWidget {
     if (filter is! SpecificPeriodsFilter) {
       return 'Specific period';
     }
-    if (filter.periods.length == 1) {
-      return filter.periods.first.label;
+    final months = filter.months;
+    if (months.length == 1) {
+      return months.first.label;
     }
-    return '${filter.periods.length} periods';
+    final years = months.map((m) => m.year).toSet();
+    if (years.length == 1 && months.length == 12) {
+      return '${years.first}';
+    }
+    return '${months.length} months';
   }
 
   Future<void> _openPeriodPicker(BuildContext context, WidgetRef ref) async {
     final currentFilter = ref.read(expensesFilterProvider);
     final preselected = currentFilter is SpecificPeriodsFilter
-        ? currentFilter.periods
-        : const <PeriodOption>[];
+        ? currentFilter.months
+        : const <MonthSelection>[];
 
-    final selected = await showModalBottomSheet<List<PeriodOption>>(
+    final selected = await showModalBottomSheet<List<MonthSelection>>(
       context: context,
       isScrollControlled: true,
-      builder: (context) => SpecificPeriodPickerSheet(preselected: preselected),
+      builder: (context) => MonthYearPickerSheet(preselected: preselected),
     );
 
     if (selected != null && selected.isNotEmpty) {

@@ -29,9 +29,9 @@ class ExpenseRepository {
           queryParameters['period'] = 'CURRENT';
         case AllExpensesFilter():
           queryParameters['period'] = 'ALL';
-        case SpecificPeriodsFilter(:final periods):
-          queryParameters['periodStart'] = periods
-              .map((p) => _dateFormat.format(p.start))
+        case SpecificPeriodsFilter(:final months):
+          queryParameters['periodStart'] = months
+              .map((m) => _dateFormat.format(m.periodStartDate))
               .toList();
       }
 

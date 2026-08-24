@@ -5,9 +5,7 @@ import 'package:flutter_riverpod/legacy.dart';
 
 import '../../data/models/expense.dart';
 import '../../data/models/expenses_filter.dart';
-import '../../data/models/period_option.dart';
 import '../../data/repositories/expense_repository.dart';
-import '../../data/repositories/salary_period_repository.dart';
 
 final expensesFilterProvider = StateProvider.autoDispose<ExpensesFilter>(
   (ref) => const CurrentPeriodFilter(),
@@ -39,11 +37,3 @@ final expenseDetailProvider = FutureProvider.autoDispose
     .family<Expense, String>((ref, id) {
       return ref.watch(expenseRepositoryProvider).get(id);
     });
-
-/// The last N salary periods, offered to the user as choices for
-/// [SpecificPeriodsFilter].
-final recentSalaryPeriodsProvider = FutureProvider.autoDispose<
-  List<PeriodOption>
->((ref) {
-  return ref.watch(salaryPeriodRepositoryProvider).recent();
-});

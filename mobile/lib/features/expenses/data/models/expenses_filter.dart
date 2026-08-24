@@ -1,4 +1,4 @@
-import 'period_option.dart';
+import 'month_selection.dart';
 
 sealed class ExpensesFilter {
   const ExpensesFilter();
@@ -13,7 +13,7 @@ class AllExpensesFilter extends ExpensesFilter {
 }
 
 class SpecificPeriodsFilter extends ExpensesFilter {
-  const SpecificPeriodsFilter(this.periods);
+  const SpecificPeriodsFilter(this.months);
 
-  final List<PeriodOption> periods;
+  final List<MonthSelection> months;
 }
