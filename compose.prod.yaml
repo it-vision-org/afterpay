@@ -1,0 +1,29 @@
+services:
+  api:
+    build:
+      context: ./backend
+    container_name: afterpay-api
+    restart: unless-stopped
+    env_file: .env
+    expose:
+      - "8080"
+    ports:
+      - "127.0.0.1:8080:8080"   # local only; Caddy handles the public side
+
+  caddy:
+    image: caddy:2
+    container_name: afterpay-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+
+volumes:
+  caddy_data:
+  caddy_config:
